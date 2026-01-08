@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 struct Todo
 {
@@ -10,20 +11,21 @@ struct Todo
 
 void helpCmd(){
     printf("THIS  IS  A  HELP  PAGE  FOR  todocli.\n\n");
-    printf(" -a : Add command adds a given string to a todo list.\n");
+    printf(" -a [id]: Add command adds a given string to a todo list.\n");
     printf(" -l : Lists the todolist.\n");
 }
 
-void addTodo(char (*todoList)[30], int count){  
-    for (int i = 0; i < count; i++){
-        printf("Enter a todo for a %d. task:\n", i+1);
-        fgets(todoList[i], sizeof(todoList[i]), stdin);
-    }
+void addTodo(struct Todo *todoList, char *idString, char *content){  
+    int id = atoi(idString);
+    strcpy(todoList[id-1].content, content);
+    todoList[id-1].id = id;
+
+    printf("%d %s", todoList[0].id, todoList[0].content);
 }
 
-void printTodo(char (*todoList)[30], int count){
-    for (int i = 0; i < count; i++){;
-        printf("%d. %s",i+1, todoList[i]);
+void printTodo(struct Todo *todoList){
+    for (int i = 0; i < 5; i++){;
+        printf("%d. ID: %d - %s.",i+1, todoList[i].id, todoList[i].content);
     }
 }
 
@@ -38,18 +40,18 @@ void genASCII(){
 }
 
 int main(int argc, char* argv[]){
-    char todoList[5][30] = {};
-    int count = sizeof(todoList) / sizeof(todoList[0]);
+    struct Todo todoList[5] = {0};
 
-    genASCII();
-    if(argc == 2){
-        if(strcmp(argv[1], "-a") == 0){
-            addTodo(todoList, count);
+    //genASCII();
+    if(argc >= 2){
+        if(strcmp(argv[1], "-a") == 0 && argv[2] && argv[3]){
+                addTodo(todoList, argv[2], argv[3]);  
         }
         else if (strcmp(argv[1], "-l") == 0){
-            printTodo(todoList, count);
+            printTodo(todoList);
         }
         else if (strcmp(argv[1], "-h") == 0){
+            genASCII();
             helpCmd();
         }
         else{
