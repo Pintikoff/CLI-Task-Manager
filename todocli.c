@@ -6,6 +6,7 @@ struct Todo
 {
     int id;
     char content[30];
+    char status[15];
 };
 
 //adds todos from a file to a struct
@@ -26,18 +27,18 @@ int readTodo(struct Todo **todoList){
         printf("error");
         return 0;
     }
-
     rewind(ftpr);
 
     int i = 0;
     while (fgets(lineContent, sizeof(lineContent), ftpr))
     {
-        int trash;
         char content[30];
+        char status[15];
 
-        sscanf(lineContent, "%d: %s", &trash, content);
+        sscanf(lineContent, "%*d: %[^|]|%[^\n]", content, status);
         (*todoList)[i].id = i+1;
         strcpy((*todoList)[i].content, content);
+        strcpy((*todoList)[i].status, status);
         i++;
     }
 
@@ -45,14 +46,13 @@ int readTodo(struct Todo **todoList){
 }
 
 void updateFile(struct Todo *todoList, int count){
-    FILE *delete;
-    delete = fopen("todocli.txt", "w");
-
     FILE *ftpr;
+    ftpr = fopen("todocli.txt", "w");
+    fprintf(ftpr, "");
     ftpr = fopen("todocli.txt","a");
-    fprintf(delete, "");
     for(int i = 0; i < count; i++){
-        fprintf(ftpr, "%d: %s \n", todoList[i].id, todoList[i].content);
+        //some trob;es with spacing here
+        fprintf(ftpr, "%d: %s|%s\n", todoList[i].id, todoList[i].content, todoList[i].status);
     }
     fclose(ftpr);
 }
@@ -70,24 +70,20 @@ void genASCII(){
 void addTodo(struct Todo *todoList, char *content, int count){
     todoList[count].id = count+1;
     strcpy(todoList[count].content, content);
+    strcpy(todoList[count].status, "todo");
 
     printf("Task added succesfully (ID: %d): %s\n", todoList[count].id, todoList[count].content);
-
+    printf("Task status: %s", todoList[count].status);
     updateFile(todoList, count+1);
 }
 
-void listTodo(struct Todo *todoList,int count){
-    for(int i = 0; i < count; i++){
-        printf("%d: %s.\n", todoList[i].id, todoList[i].content);
-    }
-}
-
 void deleteTodo(struct Todo *todoList, char *argv, int *count){
-    int givenId = atoi(argv);
-    if (givenId <= 0 || givenId > *count){
+    int id = atoi(argv);
+    int wantedInd = id - 1;
+    if (id <= 0 || id > *count){
         return;
     }
-    int wantedInd = givenId - 1;
+
     for(int i = wantedInd; i < *count; i++){
         todoList[i] = todoList[i+1];
         todoList[i-1].id = i;
@@ -95,6 +91,23 @@ void deleteTodo(struct Todo *todoList, char *argv, int *count){
     
     (*count) --;
     updateFile(todoList, *count);
+}
+
+void updateTodo(struct Todo *todoList, char *argv2, char *argv3, int count){
+    int id = atoi(argv2);
+    int wantedInd = id - 1;
+    if (id <= 0 || id > count){
+        return;
+    }
+    
+    strcpy(todoList[wantedInd].content, argv3);
+    updateFile(todoList, count);
+}
+
+void listTodo(struct Todo *todoList,int count){
+    for(int i = 0; i < count; i++){
+        printf("%d: %s.\n", todoList[i].id, todoList[i].content);
+    }
 }
 
 void clearTodo(){
@@ -124,14 +137,17 @@ int main(int argc, char* argv[]){
 
     //genASCII();
     if(argc >= 2){
-        if(strcmp(argv[1], "-a") == 0 && argv[2]){
+        if(strcmp(argv[1], "-a") == 0 && argc >= 2){
             addTodo(todoList, argv[2], count);  
+        }
+        else if (strcmp(argv[1], "-d") == 0 && argc >= 2){
+            deleteTodo(todoList, argv[2], &count);
+        }
+        else if (strcmp(argv[1], "-u") == 0 && argc >= 3){
+            updateTodo(todoList, argv[2], argv[3], count);
         }
         else if (strcmp(argv[1], "-l") == 0){
             listTodo(todoList,count);
-        }
-        else if (strcmp(argv[1], "-d") == 0 && argv[2]){
-            deleteTodo(todoList, argv[2], &count);
         }
         else if (strcmp(argv[1], "-clear") == 0){
             clearTodo();
