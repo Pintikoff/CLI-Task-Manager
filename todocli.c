@@ -108,6 +108,29 @@ void updateTodo(struct Todo *todoList, char *givenId, char *content, int count){
     updateFile(todoList, count);
 }
 
+void updateState(struct Todo *todoList, char *givenId, char *givenState, int count){
+    int id = atoi(givenId);
+    int statusId = atoi(givenState);
+    if(id <= 0 || id > count || !id || statusId < 1 || statusId > 3 || !statusId){
+        printf("Syntax error. check -h command");
+        return;
+    }
+    int wantedInd = id - 1;
+    switch(statusId){
+        case 1:
+            strcpy(todoList[wantedInd].status, "todo");
+            break;
+        case 2:
+            strcpy(todoList[wantedInd].status, "in-progress");
+            break;
+        case 3:
+            strcpy(todoList[wantedInd].status, "done");
+            break;
+    }
+    printf("%s", todoList[wantedInd].status);
+    updateFile(todoList, count);
+}
+
 void listTodo(struct Todo *todoList,int count){
     for(int i = 0; i < count; i++){
         printf("%d: %s.\n", todoList[i].id, todoList[i].content);
@@ -131,7 +154,7 @@ void helpTodo(){
     printf("   -h   : Displays this help command.\n\n");
 }
 
-int main(int argc, char* argv[]){
+int main(int argc, char *argv[]){
     struct Todo *todoList = NULL;
     int count = readTodo(&todoList);
     if (todoList == NULL){
@@ -150,7 +173,9 @@ int main(int argc, char* argv[]){
         else if (strcmp(argv[1], "-u") == 0 && argc >= 3){
             updateTodo(todoList, argv[2], argv[3], count);
         }
-        else if (strcmp(argv[1], "-m") == 0 && argc)
+        else if (strcmp(argv[1], "-m") == 0 && argc >= 3){
+            updateState(todoList, argv[2], argv[3], count);
+        }
         else if (strcmp(argv[1], "-l") == 0){
             listTodo(todoList,count);
         }
