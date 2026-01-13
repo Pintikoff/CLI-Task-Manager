@@ -5,7 +5,7 @@
 struct Todo
 {
     int id;
-    char content[30];
+    char content[100];
     char status[15];
 };
 
@@ -15,7 +15,8 @@ int readTodo(struct Todo **todoList){
     ftpr = fopen("todocli.txt","r");
 
     int count = 0;
-    char lineContent[100];
+    char lineContent[sizeof((*todoList)[0].content)
+        + sizeof((*todoList)[0].status) + 4];
 
     while (fgets(lineContent, sizeof(lineContent), ftpr))
     {
@@ -32,7 +33,7 @@ int readTodo(struct Todo **todoList){
     int i = 0;
     while (fgets(lineContent, sizeof(lineContent), ftpr))
     {
-        char content[30];
+        char content[100];
         char status[15];
 
         sscanf(lineContent, "%*d: %[^|]|%[^\n]", content, status);
@@ -48,8 +49,6 @@ int readTodo(struct Todo **todoList){
 void updateFile(struct Todo *todoList, int count){
     FILE *ftpr;
     ftpr = fopen("todocli.txt", "w");
-    fprintf(ftpr, "");
-    ftpr = fopen("todocli.txt","a");
     for(int i = 0; i < count; i++){
         //some trob;es with spacing here
         fprintf(ftpr, "%d: %s|%s\n", todoList[i].id, todoList[i].content, todoList[i].status);
@@ -98,7 +97,7 @@ void deleteTodo(struct Todo *todoList, char *argv, int *count){
 
 void updateTodo(struct Todo *todoList, char *givenId, char *content, int count){
     int id = atoi(givenId);
-    if(id <= 0 || id > count || !content || !id){
+    if(id <= 0 || id > count || !content){
         printf("Syntax error. check -h command");
         return;
     }
@@ -111,7 +110,7 @@ void updateTodo(struct Todo *todoList, char *givenId, char *content, int count){
 void updateState(struct Todo *todoList, char *givenId, char *givenState, int count){
     int id = atoi(givenId);
     int statusId = atoi(givenState);
-    if(id <= 0 || id > count || !id || statusId < 1 || statusId > 3 || !statusId){
+    if(id <= 0 || id > count || statusId < 1 || statusId > 3){
         printf("Syntax error. check -h command");
         return;
     }
@@ -133,7 +132,7 @@ void updateState(struct Todo *todoList, char *givenId, char *givenState, int cou
 
 void listTodo(struct Todo *todoList,int count){
     for(int i = 0; i < count; i++){
-        printf("%d: %s.\n", todoList[i].id, todoList[i].content);
+        printf("%d: %s | %s\n", todoList[i].id, todoList[i].content, todoList[i].status);
     }
 }
 
