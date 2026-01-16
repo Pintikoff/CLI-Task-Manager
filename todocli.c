@@ -12,7 +12,12 @@ struct Todo
 //adds todos from a file to a struct
 int readTodo(struct Todo **todoList){
     FILE *ftpr;
-    ftpr = fopen("todocli.txt","r");
+    ftpr = fopen("todocli.txt", "r");
+    if (!ftpr) {
+        ftpr = fopen("todocli.txt", "w");
+        ftpr = fopen("todocli.txt", "r");
+    }
+
 
     int count = 0;
     char lineContent[sizeof((*todoList)[0].content)
@@ -24,7 +29,7 @@ int readTodo(struct Todo **todoList){
     }
 
     *todoList = malloc(sizeof(struct Todo) * (count+1));
-    if (todoList == NULL){
+    if (*todoList == NULL){
         printf("error");
         return 0;
     }
@@ -139,7 +144,7 @@ void listTodo(struct Todo *todoList,int count){
 void clearTodo(){
     FILE *ftpr;
     ftpr = fopen("todocli.txt","w");
-    fprintf(ftpr, "");
+    fprintf(ftpr, " ");
 }
 
 void helpTodo(){
