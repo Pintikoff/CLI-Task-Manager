@@ -11,23 +11,24 @@ struct Todo
 
 //adds todos from a file to a struct
 int readTodo(struct Todo **todoList){
-    FILE *ftpr = fopen("todocli.txt", "r");
+    FILE *ftpr = fopen("todocli.json", "r");
     if (!ftpr) {
-        ftpr = fopen("todocli.txt", "w");
-        ftpr = fopen("todocli.txt", "r");
+        ftpr = fopen("todocli.json", "w");
+        ftpr = fopen("todocli.json", "r");
     }
 
-
     int count = 0;
-    char lineContent[sizeof((*todoList)[0].content)
+    char lineContent [sizeof((*todoList)[0].content)
         + sizeof((*todoList)[0].status) + 4];
 
     while (fgets(lineContent, sizeof(lineContent), ftpr))
     {
         count ++;
     }
-
-    *todoList = malloc(sizeof(struct Todo) * (count+1));
+    count = count - 2;
+    printf("%d",count);
+    count = count/5 ;
+    *todoList = malloc(sizeof(struct Todo) * (count + 1));
     if (*todoList == NULL){
         printf("error");
         return 0;
@@ -35,32 +36,60 @@ int readTodo(struct Todo **todoList){
     rewind(ftpr);
 
     int i = 0;
+    char content[100];
+    char status[15];
+    char idStr[5];
     while (fgets(lineContent, sizeof(lineContent), ftpr))
-    {
-        char content[100];
-        char status[15];
+    {       
+        char* idPtr = strstr(lineContent, "\"taskId\": ");
+        if(idPtr){
+            sscanf(idPtr, "\"taskId\": %[^,]", idStr);
+            int id = atoi(idStr);
+            (*todoList)[i].id = id;
+            continue;
+        }
 
-        sscanf(lineContent, "%*d: %[^|]|%[^\n]", content, status);
-        (*todoList)[i].id = i+1;
-        strcpy((*todoList)[i].content, content);
-        strcpy((*todoList)[i].status, status);
-        i++;
+        char* contentPtr = strstr(lineContent, "\"content\": ");
+        if(contentPtr){
+            sscanf(contentPtr, "\"content\": \"%[^\"]", content);
+            strcpy((*todoList)[i].content, content);
+            continue;
+        }
+
+        char* statusPtr = strstr(lineContent, "\"status\": ");
+        if(statusPtr){
+            sscanf(statusPtr, "\"status\": \"%[^\"]", status);
+            strcpy((*todoList)[i].status, status);
+            i++;
+            continue;
+        }
+        
     }
-
     return count;
 }
 
 void updateFile(struct Todo *todoList, int count){
-    FILE *ftpr = fopen("todocli.txt", "w");
+    FILE *ftpr = fopen("todocli.json", "w");
+    fprintf(ftpr, "[\n\t");
     for(int i = 0; i < count; i++){
-        //some trob;es with spacing here
-        fprintf(ftpr, "%d: %s|%s\n", todoList[i].id, todoList[i].content, todoList[i].status);
+        fprintf(ftpr, "{\n\t\t");
+        fprintf(ftpr, "\"taskId\": %d,\n\t\t", todoList[i].id);
+        fprintf(ftpr, "\"content\": \"%s\",\n\t\t", todoList[i].content);
+        fprintf(ftpr, "\"status\": \"%s\"\n\t", todoList[i].status);
+        if(i == count-1){
+            fprintf(ftpr, "}\n");
+            fprintf(ftpr, "]\n");
+            break;
+        }
+        fprintf(ftpr, "},\n\t");
+        //fprintf(ftpr, "%d: %s|%s\n", todoList[i].id, todoList[i].content, todoList[i].status);
     }
+
     fclose(ftpr);
 }
 
 void genASCII(){
-    printf("   ___       ___       ___       ___            ___       ___       ___   \n");
+    printf(" ___       ___       ___       ___            ___       ___       ___   \n");
     printf("  /\\  \\     /\\  \\     /\\  \\     /\\  \\          /\\  \\     /\\  \\     /\\  \\  \n");
     printf("  \\:\\  \\   /::\\  \\   /::\\  \\   /::\\  \\        /::\\  \\   /::\\  \\   /::\\  \\ \n");
     printf("  /: \\__\\ /:/\\:\\__\\ /:/\\:\\__\\ /:/\\:\\__\\      /::\\:\\__\\ /::\\:\\__\\ /::\\:\\__\\ \n");
@@ -113,8 +142,10 @@ void deleteTodo(struct Todo *todoList, char *argv, int *count){
 }
 
 void updateTodo(struct Todo *todoList, char *givenId, char *content, int count){
-    int hasContent = 0;
     int id = atoi(givenId);
+    int wantedInd = id - 1; 
+    
+    int hasContent = 0;
     if(id <= 0 || id > count){
         printf("ERROR: Not valid id");
         return;
@@ -133,7 +164,7 @@ void updateTodo(struct Todo *todoList, char *givenId, char *content, int count){
         printf("ERROR: Enter a valid content.");
         return;
     }
-    int wantedInd = id - 1;    
+   
     strcpy(todoList[wantedInd].content, content);
     updateFile(todoList, count);
 
@@ -143,6 +174,7 @@ void updateTodo(struct Todo *todoList, char *givenId, char *content, int count){
 void updateState(struct Todo *todoList, char *givenId, char *givenState, int count, char **statusArr){
     int id = atoi(givenId);
     int statusId = atoi(givenState);
+    int wantedInd = id - 1;
     if(id <= 0 || id > count){
         printf("ERROR: Not valid id");
         return;
@@ -152,7 +184,6 @@ void updateState(struct Todo *todoList, char *givenId, char *givenState, int cou
         return;
     }
 
-    int wantedInd = id - 1;
     strcpy(todoList[wantedInd].status, statusArr[statusId]);
     updateFile(todoList, count);
     printf("Todo #%d status changed to: '%s'\n", id, todoList[wantedInd].status);
@@ -165,7 +196,7 @@ void listTodo(struct Todo *todoList,int count){
 }
 
 void clearTodo(){
-    FILE *ftpr = fopen("todocli.txt", "w");
+    FILE *ftpr = fopen("todocli.json", "w");
     printf("List has been succesfuly cleared");
 }
 
