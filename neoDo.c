@@ -173,41 +173,45 @@ void updateState(struct Todo *todoList, char *givenId, char *givenState, int cou
     int id = atoi(givenId);
     int statusId = atoi(givenState);
     int wantedInd = id - 1;
+    char status[15]; 
     if(id < 1 || id > count){
         printf("ERROR: Not valid id");
         return;
     }
-
-    if(statusId >= 1 && statusId >= 3){
-        strcpy(todoList[wantedInd].status, statusArr[statusId]);
-        updateFile(todoList, count);
-        printf("Todo #%d status changed to: '%s'\n", id, todoList[wantedInd].status);
+    //change status with id:
+    if(statusId >= 1 && statusId <= 3){
+        strcpy(status, statusArr[statusId]);  
     }
+    //change status with string:
     else if(strcmp(givenState, "todo") == 0||strcmp(givenState, "in-progress") == 0||strcmp(givenState, "done") == 0){
-        strcpy(todoList[wantedInd].status, givenState);
-        updateFile(todoList, count);
-        printf("Todo #%d status changed to: '%s'\n", id, todoList[wantedInd].status);
+        strcpy(status, givenState);
     }
     else{
         printf("ERROR: Not valid status ID(1-3). check -h operator");
         return;
     }
+
+    strcpy(todoList[wantedInd].status, status);
+    updateFile(todoList, count);
+    printf("Todo #%d status changed to: '%s'\n", id, todoList[wantedInd].status);
 }
 
-void listTodo(struct Todo *todoList, char *sortBy, int count){
-    if(!sortBy){
+void listTodo(struct Todo *todoList, char *givenState, int count){
+    if(!givenState){
         for(int i = 0; i < count; i++){
             printf("ID-%d: %s [%s]\n", todoList[i].id, todoList[i].content, todoList[i].status);
         }
         return;
     } 
+    int statusId = atoi(givenState);
+    char status[15];
     //list by status Todo's
     for(int i = 0; i < count; i++){
-        if(strcmp(sortBy, todoList[i].status) == 0){
+        if(strcmp(givenState, todoList[i].status) == 0){
             printf("ID-%d: %s [%s]\n", todoList[i].id, todoList[i].content, todoList[i].status);
         }
         else{
-            printf("The're no tasks with %s status (check help page [-h] for more info)", sortBy);
+            printf("The're no tasks with \"%s\" status (check help page [-h] for more info)", givenState);
         }
     }
 }
