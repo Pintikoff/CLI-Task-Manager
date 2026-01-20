@@ -1,10 +1,12 @@
 NeoDo - Command Line Task Tracker
- __   __     ______     ______     _____     ______  
-/\ "-.\ \   /\  ___\   /\  __ \   /\  __-.  /\  __ \   
-\ \ \-.  \  \ \  __\   \ \ \/\ \  \ \ \/\ \ \ \ \/\ \  
- \ \_\\"\_\  \ \_____\  \ \_____\  \ \____-  \ \_____\ 
-  \/_/ \/_/   \/_____/   \/_____/   \/____/   \/_____/
-  
+
+						   ____      
+		 ____  ___  ____  / __ \____ 
+		/ __ \/ _ \/ __ \/ / / / __ \
+	   / / / /  __/ /_/ / /_/ / /_/ /
+	  /_/ /_/\___/\____/_____/\____/                                     
+
+														 
 A simple and efficient command-line task tracker written in C. Manage your tasks directly from the terminal with persistent JSON storage.
 Project inspired by roadmap.sh Task Tracker Project
 Features
